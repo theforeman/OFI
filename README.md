@@ -13,7 +13,14 @@ Simlink `config/ofi.local.rb` to yours Foreman `bundle.d`.
 
 ## Usage
 
-*Usage here*
+### Dynflow test from console
+
+Assuming that hostgroup is set up with all the necessary information to provision a host, a host provisioning can be triggered using Dynflow form console. E.g.
+
+    ForemanTasks.trigger Actions::Host::Create, 
+                         'rhel4', 
+                         Hostgroup.find(8), 
+                         ComputeResource.find(1)
 
 ## TODO
 
