@@ -51,9 +51,10 @@ module Actions
               enabled:             true,
               provision_method:    'build')
           host.save!
-          output.update host: { id: host.id }
-
-          # TODO suspend and wait for the provisioning to finish
+          output.update host: { id:   host.id,
+                                name: host.name,
+                                ip:   host.ip,
+                                mac:  host.mac }
         end
 
         def humanized_input
