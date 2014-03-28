@@ -7,8 +7,22 @@ module Staypuft
     belongs_to :hostgroup, :dependent => :destroy
 
     has_many :deployment_role_hostgroups, :dependent => :destroy, :order => "staypuft_deployment_role_hostgroups.deploy_order ASC"
-    has_many :child_hostgroups, :through => :deployment_role_hostgroups, :class_name => 'Hostgroup',
-                                :source => :hostgroup, :order => "staypuft_deployment_role_hostgroups.deploy_order ASC"
+
+    # using custom finder_sql instead of :has_many, :through since :order on hostgroup
+    # queries doesn't work (Hostgroup overrides default_scope to order by label -- this
+    # can't be undone here because .except(:order) only works on queries, not in :has_many
+    # and unscope doesn't work in rails 3)
+    has_many :child_hostgroups, :class_name => 'Hostgroup', :source => :hostgroup, :finder_sql => Proc.new {
+      %Q{
+           SELECT hostgroups.* 
+           FROM hostgroups 
+           INNER JOIN staypuft_deployment_role_hostgroups
+                 ON hostgroups.id = staypuft_deployment_role_hostgroups.hostgroup_id
+           WHERE staypuft_deployment_role_hostgroups.deployment_id = #{id}
+           ORDER BY staypuft_deployment_role_hostgroups.deploy_order ASC
+       }
+    }
+
     has_many :roles, :through => :deployment_role_hostgroups, :order => "staypuft_deployment_role_hostgroups.deploy_order ASC"
 
     validates  :name, :presence => true, :uniqueness => true
