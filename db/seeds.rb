@@ -226,10 +226,12 @@ roles.each do |role_data|
         when params.include?(class_param.key)
           class_param.key_type      = get_key_type.(params[class_param.key])
           class_param.default_value = params[class_param.key]
+          class_param.override      = true
         when used_in_ui.include?(class_param.key)
+          class_param.override = true
         else
+          class_param.override = false
         end
-        class_param.override = true
         class_param.save!
       end
       role.puppetclasses = [puppet_class]
