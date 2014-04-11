@@ -23,6 +23,7 @@ module Actions
 
         def run
           host             = ::Host.find(input[:host_id])
+          host.build       = true
           # return back to hostgroup's environment
           host.environment = nil
           host.save!
