@@ -51,8 +51,8 @@ module Staypuft
                                  "swift_storage_ips"],
       "Glance (non-HA)"=> ["glance_db_password", "glance_user_password"],
       "Cinder"=> ["cinder_backend_gluster", "cinder_backend_iscsi",
-                  "cinder_db_password", "cinder_gluster_servers",
-                  "cinder_gluster_volume", "cinder_user_password"],
+                  "cinder_db_password",
+                  "cinder_gluster_volume"],
       "Heat"=> ["heat_cfn", "heat_cloudwatch", "heat_db_password", "heat_user_password"],
       "Ceilometer"=> ["ceilometer_metering_secret", "ceilometer_user_password"
                      ],
@@ -67,14 +67,10 @@ module Staypuft
       "OVS" => ["ovs_bridge_mappings", "ovs_bridge_uplinks",
                 "ovs_tunnel_iface", "ovs_tunnel_types", "ovs_vlan_ranges",
                 "ovs_vxlan_udp_port" ],
-      "Nova-compute" => ["admin_password", "auto_assign_floating_ip",
-                         "ceilometer_metering_secret", "ceilometer_user_password",
+      "Nova-compute" => ["auto_assign_floating_ip",
                          "cinder_backend_gluster", "controller_priv_host",
-                         "controller_pub_host", "fixed_network_range",
-                         "floating_network_range", "mysql_ca", "mysql_host",
-                         "nova_db_password", "nova_network_private_iface",
-                         "nova_network_public_iface", "nova_user_password",
-                         "qpid_host", "ssl", "verbose"],
+                         "controller_pub_host", "mysql_host",
+                         "qpid_host"],
       "Neutron-compute" => ["admin_password", "ceilometer_metering_secret",
                             "ceilometer_user_password", "cinder_backend_gluster",
                             "controller_admin_host", "controller_priv_host",
@@ -88,8 +84,66 @@ module Staypuft
                             "tenant_network_type", "tunnel_id_ranges", "verbose"],
       "Neutron-ovs-agent"=> [],
       "Swift" => ["swift_all_ips", "swift_ext4_device", "swift_local_interface",
-                  "swift_loopback", "swift_ring_server", "swift_shared_secret"]
-
+                  "swift_loopback", "swift_ring_server"],
+      "Database (HA -- temp)" => [],
+      "Cinder (HA)" => ["db_password", "volume", "volume_backend", "glusterfs_shares"],
+      "Nova (HA)" => [["auto_assign_floating_ip", "quickstack::pacemaker::nova"],
+                      ["default_floating_pool", "quickstack::pacemaker::nova"],
+                      ["force_dhcp_release", "quickstack::pacemaker::nova"]],
+      "Glance (HA)" => [["backend", "quickstack::pacemaker::glance"],
+                        ["filesystem_store_datadir", "quickstack::pacemaker::glance"],
+                        ["db_password", "quickstack::pacemaker::glance"]],
+      "qpid (HA)" => [],
+      "Memcached (HA)" => [],
+      "Load Balancer (HA)" => [],
+      "Keystone (HA)" => [["admin_email", "quickstack::pacemaker::keystone"],
+                          ["admin_password", "quickstack::pacemaker::keystone"],
+                          ["admin_tenant", "quickstack::pacemaker::keystone"],
+                          ["admin_token", "quickstack::pacemaker::keystone"],
+                          ["keystonerc", "quickstack::pacemaker::keystone"],
+                          ["db_password", "quickstack::pacemaker::keystone"]],
+      "HA (Controller)"  => [["fence_ipmilan_address", "quickstack::pacemaker::common"],
+                             ["fence_ipmilan_interval", "quickstack::pacemaker::common"],
+                             ["fence_ipmilan_password", "quickstack::pacemaker::common"],
+                             ["fence_ipmilan_username", "quickstack::pacemaker::common"],
+                             ["fence_xvm_clu_iface", "quickstack::pacemaker::common"],
+                             ["fence_xvm_key_file_password", "quickstack::pacemaker::common"],
+                             ["fence_xvm_manage_key_file", "quickstack::pacemaker::common"],
+                             ["fencing_type", "quickstack::pacemaker::common"],
+                             ["pacemaker_cluster_members", "quickstack::pacemaker::common"],
+                             ["cinder_admin_vip", "quickstack::pacemaker::params"],
+                             ["cinder_private_vip", "quickstack::pacemaker::params"],
+                             ["cinder_public_vip", "quickstack::pacemaker::params"],
+                             ["db_vip", "quickstack::pacemaker::params"],
+                             ["glance_admin_vip", "quickstack::pacemaker::params"],
+                             ["glance_private_vip", "quickstack::pacemaker::params"],
+                             ["glance_public_vip", "quickstack::pacemaker::params"],
+                             ["heat_admin_vip", "quickstack::pacemaker::params"],
+                             ["heat_cfn_admin_vip", "quickstack::pacemaker::params"],
+                             ["heat_cfn_private_vip", "quickstack::pacemaker::params"],
+                             ["heat_cfn_public_vip", "quickstack::pacemaker::params"],
+                             ["heat_private_vip", "quickstack::pacemaker::params"],
+                             ["heat_public_vip", "quickstack::pacemaker::params"],
+                             ["keystone_admin_vip", "quickstack::pacemaker::params"],
+                             ["keystone_private_vip", "quickstack::pacemaker::params"],
+                             ["keystone_public_vip", "quickstack::pacemaker::params"],
+                             ["lb_backend_server_addrs", "quickstack::pacemaker::params"],
+                             ["lb_backend_server_names", "quickstack::pacemaker::params"],
+                             ["loadbalancer_admin_vip", "quickstack::pacemaker::params"],
+                             ["loadbalancer_private_vip", "quickstack::pacemaker::params"],
+                             ["loadbalancer_public_vip", "quickstack::pacemaker::params"],
+                             ["neutron_admin_vip", "quickstack::pacemaker::params"],
+                             ["neutron_private_vip", "quickstack::pacemaker::params"],
+                             ["neutron_public_vip", "quickstack::pacemaker::params"],
+                             ["nova_admin_vip", "quickstack::pacemaker::params"],
+                             ["nova_private_vip", "quickstack::pacemaker::params"],
+                             ["nova_public_vip", "quickstack::pacemaker::params"],
+                             ["private_iface", "quickstack::pacemaker::params"],
+                             ["private_ip", "quickstack::pacemaker::params"],
+                             ["qpid_vip", "quickstack::pacemaker::params"],
+                             ["swift_admin_vip", "quickstack::pacemaker::params"],
+                             ["swift_private_vip", "quickstack::pacemaker::params"],
+                             ["swift_public_vip", "quickstack::pacemaker::params"]]
     }
 
     def ui_params_for_form(hostgroup = self.hostgroups.first)
@@ -112,12 +166,7 @@ module Staypuft
                                          :param_key => param_lookup_key}
         end.compact
       end
-      params_from_service = self.puppetclasses.collect do |pclass|
-        pclass.class_params.collect do |class_param|
-          {:hostgroup => hostgroup, :puppetclass => pclass, :param_key => class_param}
-        end
-      end.flatten
-      params_from_hash + params_from_service
+      params_from_hash
     end
   end
 end
