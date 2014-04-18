@@ -219,7 +219,7 @@ roles = [
      :services=>[:neutron_l3, :dhcp, :ovs]},
     {:name=>"LVM Block Storage",
      :class=>"quickstack::storage_backend::lvm_cinder",
-     :layouts=>[[:ha_nova, 1], [:ha_neutron, 1], [:non_ha_nova, 1], [:non_ha_neutron, 1]],
+     :layouts=>[[:ha_nova, 2], [:ha_neutron, 1], [:non_ha_nova, 1], [:non_ha_neutron, 1]],
      :services=>[:cinder]},
     {:name=>"Swift Storage Node",
      :class=>"quickstack::swift::storage",
@@ -236,7 +236,7 @@ roles = [
          # this one is temporary -- goes away once db is added back to HA COntroller
     {:name=>"HA Database (temporary)",
      :class=>[],
-     :layouts=>[[:ha_nova, 2]],
+     :layouts=>[[:ha_nova, 1]],
      :services=>[:ha_db_temp]}
         ]
 
