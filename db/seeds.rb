@@ -21,6 +21,7 @@ params = {
   "cinder_user_password"          => SecureRandom.hex,
   "cinder_backend_gluster"        => "false",
   "cinder_backend_iscsi"          => "false",
+  "cinder_iscsi_network"          => "10.0.0.1",
   "cinder_gluster_peers"          => [],
   "cinder_gluster_volume"         => "cinder",
   "cinder_gluster_replica_count"  => '3',
@@ -51,6 +52,8 @@ params = {
   "swift_ext4_device"             => '/dev/sdc2',
   "swift_local_interface"         => 'eth3',
   "swift_loopback"                => true,
+  "swift_internal_network"        => "10.0.0.1",
+  "swift_local_network"           => "10.0.0.1",
   "swift_ring_server"             => '192.168.203.1',
   "fixed_network_range"           => '10.0.0.0/24',
   "floating_network_range"        => '10.0.1.0/24',
@@ -76,6 +79,7 @@ params = {
   "ovs_bridge_mappings"           => [],
   "ovs_bridge_uplinks"            => [],
   "ovs_tunnel_iface"              => 'eth0',
+  "ovs_tunnel_network"            => '10.0.0.1',
   "tenant_network_type"           => 'gre',
   "enable_tunneling"              => 'True',
   "ovs_vxlan_udp_port"            => '4789',
@@ -108,6 +112,10 @@ params = {
   "qpid_nssdb_password"           => SecureRandom.hex,
   "fence_xvm_key_file_password"   => SecureRandom.hex,
   "use_qemu_for_poc"              => "false",
+  "fence_xvm_clu_network"         => "10.0.0.1",
+  "network_public_network"        => "10.0.0.1",
+  "network_private_network"       => "10.0.0.1",
+  "private_network"               => "10.0.0.1",
 }
 
 def get_key_type(value)
