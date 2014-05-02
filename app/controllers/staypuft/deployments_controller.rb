@@ -46,6 +46,16 @@ module Staypuft
       redirect_to foreman_tasks_task_url(id: task)
     end
 
+    def cancel
+      @deployment = Deployment.find(params[:id])
+      if ForemanTasks::Lock.where(name: 'deploy').destroy_all
+        flash[:notice] = _('Deployment successfully cancelled.')
+      else
+        flash[:error] = _('An error occurred whilst attemptimg to cancel deployment.')
+      end
+      redirect_to deployment_path()
+    end
+
     # TODO remove, it's temporary
     def populate
       task = ForemanTasks.async_task ::Actions::Staypuft::Deployment::Populate,
