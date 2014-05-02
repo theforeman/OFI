@@ -30,6 +30,10 @@
             _('Deploy in progress'),
             hash_for_foreman_tasks_task_path(id: ForemanTasks::Lock.colliding_locks(@deployment, nil).first.task.id),
             :class => 'btn-info') %>
+    <%= display_link_if_authorized(
+            _('Cancel'),
+            hash_for_cancel_deployment_path(@deployment),
+            :class => 'btn-danger') %>
   <% else %>
     <%= link_to(_("Deploy"),
                 "",

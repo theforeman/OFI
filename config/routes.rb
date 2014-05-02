@@ -9,6 +9,7 @@ Rails.application.routes.draw do
         get 'deploy'
         get 'populate'
         get 'summary'
+        get 'cancel'
       end
     end
 
