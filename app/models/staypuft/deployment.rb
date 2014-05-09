@@ -59,6 +59,11 @@ module Staypuft
       super
     end
 
+    def ha?
+      # FIXME should be stored in the Layout model as flag
+      !! layout.name =~ /with High Availability/
+    end
+
     # After setting or changing layout, update the set of child hostgroups,
     # adding groups for any roles not already represented, and removing others
     # no longer needed.

@@ -20,11 +20,17 @@ module Actions
 
           input.update host: { id: host.id, name: host.name }
 
+          deployment = host.hostgroup.deployment
+
           unless host.open_stack_deployed?
             sequence do
               plan_action Host::Build, host.id
               plan_action Host::WaitUntilInstalled, host.id
               plan_action Host::WaitUntilHostReady, host.id
+              if deployment.ha?
+                # TODO make sure the flag is still in the puppet modules
+                plan_action Host::WaitUntilHostReady, host.id, facts: { 'hamysql_is_running' => 'true' }
+              end
             end
           else
             # it is already deployed
