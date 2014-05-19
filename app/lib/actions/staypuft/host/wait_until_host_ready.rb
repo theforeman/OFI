@@ -57,15 +57,10 @@ module Actions
           5
         end
 
-        # TODO The puppet modules sometimes fail then become ready
-        # after subsequent hosts have started.  For this reason
-        # we can not check to see if the host is ready using the
-        # stats on the host only.  This needs fixing in the puppet
-        # modules then reflecting here.
         def host_ready?(host_id)
           host = ::Host.find(host_id)
           host.reports.order('reported_at DESC').any? do |report|
-            #check_for_failures(report, host.id)
+            check_for_failures(report, host.id)
             report_change?(report)
           end
         end
