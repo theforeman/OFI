@@ -13,12 +13,13 @@
 module Actions
   module Staypuft
     module Host
-      class Build < Dynflow::Action
+      class TriggerProvisioning < Dynflow::Action
 
         middleware.use Actions::Staypuft::Middleware::AsCurrentUser
 
-        def plan(host_id)
-          plan_self host_id: host_id
+        def plan(host)
+          fail 'cannot provision unmanaged host' unless host.managed?
+          plan_self host_id: host.id
         end
 
         def run
@@ -28,7 +29,7 @@ module Actions
           host.set_token
           host.save!
           host.send :setTFTP
-          restart(host)
+          restart host
         end
 
         private
@@ -58,7 +59,7 @@ module Actions
         def restart_with_power_management(power)
           check_expected_state(power.state)
           if %w(running on).include?(power.state)
-            if !power.reset
+            unless power.reset
               fail(::Staypuft::Exception, 'Resetting Host Failed')
             end
           end
@@ -72,7 +73,7 @@ module Actions
         end
 
         def check_expected_state(state)
-          if !%w(running on cycle shutoff off).include?(state.downcase)
+          unless %w(running on cycle shutoff off).include?(state.downcase)
             raise(::Staypuft::Exception, "Unexpected Host Power State: #{state}")
           end
         end

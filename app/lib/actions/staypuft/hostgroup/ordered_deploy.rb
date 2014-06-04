@@ -18,13 +18,36 @@ module Actions
 
         middleware.use Actions::Staypuft::Middleware::AsCurrentUser
 
-        def plan(hostgroups, hosts = hostgroups.inject([]) { |a, hg| a + hg.hosts })
+        def plan(hostgroups, hosts_to_deploy, hosts_to_provision)
+          hosts_to_deploy    = hostgroups.map(&:hosts).reduce(&:+) if hosts_to_deploy.nil?
+          hosts_to_provision = hosts_to_deploy.select(&:managed?) if hosts_to_provision.nil?
+
           (Type! hostgroups, Array).all? { |v| Type! v, ::Hostgroup }
-          (Type! hosts, Array).all? { |v| Type! v, ::Host::Base }
+          (Type! hosts_to_deploy, Array).all? { |v| Type! v, ::Host::Base }
+
 
           sequence do
+            hosts = hostgroups.map(&:hosts).reduce(&:+) & hosts_to_provision
+            hosts.each { |host| plan_action Host::TriggerProvisioning, host }
+
+            concurrence do
+              hosts.each { |host| plan_action Host::WaitUntilProvisioned, host }
+            end
+
+            input.update hostgroups: {}
             hostgroups.each do |hostgroup|
-              plan_action Hostgroup::Deploy, hostgroup, hosts
+              concurrence do
+                input[:hostgroups].update hostgroup.id => { name: hostgroup.name, hosts: {} }
+
+                (hostgroup.hosts & hosts_to_deploy).each do |host|
+                  input[:hostgroups][hostgroup.id][:hosts].update host.id => host.name
+
+                  sequence do
+                    plan_action Host::WaitUntilReady, host
+                    plan_action Host::Deploy, host
+                  end
+                end
+              end
             end
           end
         end
@@ -34,7 +57,32 @@ module Actions
         end
 
         def humanized_output
-          planned_actions.map(&:humanized_output).join("\n")
+          steps          = all_planned_actions.map { |a| a.steps[1..2] }.reduce(&:+).compact
+          stets_by_hosts = steps.inject({}) do |hash, step|
+            key       = step.action(execution_plan).input[:host_id]
+            hash[key] ||= []
+            hash[key] << step
+            hash
+          end
+
+          progresses_by_host = stets_by_hosts.inject({}) do |hash, (host_id, steps)|
+            progress = if steps.empty?
+                         'done'
+                       else
+                         total          = steps.map { |s| s.progress_done * s.progress_weight }.reduce(&:+)
+                         weighted_count = steps.map(&:progress_weight).reduce(&:+)
+                         format '%3d%%', total / weighted_count * 100
+                       end
+
+            hash.update host_id => progress
+          end
+
+          input.fetch(:hostgroups).map do |_, hostgroup|
+            [hostgroup[:name],
+             *hostgroup[:hosts].map { |id, name| format '  %s Host: %s', progresses_by_host[id.to_i], name },
+             ('    -' if hostgroup[:hosts].empty?)
+            ].compact
+          end.join("\n")
         end
       end
     end

@@ -13,36 +13,19 @@
 module Actions
   module Staypuft
     module Host
-      class Deploy < Actions::Base
+      class Deploy < Dynflow::Action
 
         def plan(host)
           Type! host, ::Host::Base
 
           input.update host: { id: host.id, name: host.name }
 
-          unless host.open_stack_deployed?
-            sequence do
-              plan_action Host::Build, host.id
-              plan_action Host::WaitUntilInstalled, host.id
-              plan_action Host::WaitUntilHostReady, host.id
-            end
-          else
-            # it is already deployed
+          sequence do
+            puppet_run = plan_action Host::PuppetRun, host
+            plan_action Host::ReportCheck, host.id, puppet_run.output[:executed_at]
           end
         end
 
-        def humanized_output
-          # TODO: use Action::Progress.calculate in new dynflow version
-          steps    = planned_actions.inject([]) { |s, a| s + a.steps[1..2] }.compact
-          progress = if steps.empty?
-                       'done'
-                     else
-                       total          = steps.map { |s| s.progress_done * s.progress_weight }.reduce(&:+)
-                       weighted_count = steps.map(&:progress_weight).reduce(&:+)
-                       format '%3d%%', total / weighted_count * 100
-                     end
-          format '%s Host: %s', progress, input[:host][:name]
-        end
 
       end
     end
