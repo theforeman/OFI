@@ -31,6 +31,10 @@ module Actions
           external_task
         end
 
+        def self.ssh_ready? ip
+          system("ssh -i #{Setting[:dynflow_sshkey]} -o \"StrictHostKeyChecking no\" root@#{ip} \"echo 'done'\"")
+        end
+
         private
 
         def invoke_external_task
@@ -43,13 +47,12 @@ module Actions
 
         def poll_external_task
           host = ::Host.find input.fetch(:host_id)
-          host.send :ssh_open?, host.ip
+          self.class.ssh_ready? host.ip
         end
 
         def poll_interval
           5
         end
-
       end
     end
   end
