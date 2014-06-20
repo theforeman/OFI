@@ -19,8 +19,8 @@ module Actions
         middleware.use Actions::Staypuft::Middleware::AsCurrentUser
         include Dynflow::Action::Polling
 
-        def plan(host_id)
-          plan_self host_id: host_id
+        def plan(host_id, options = {})
+          plan_self host_id: host_id, options: options
         end
 
         def external_task
@@ -50,7 +50,7 @@ module Actions
         end
 
         def poll_external_task
-          host_ready?(input[:host_id])
+          host_ready?(input[:host_id], input[:options][:facts])
         end
 
         def poll_interval
@@ -62,9 +62,15 @@ module Actions
         # we can not check to see if the host is ready using the
         # stats on the host only.  This needs fixing in the puppet
         # modules then reflecting here.
-        def host_ready?(host_id)
+        def host_ready?(host_id, facts)
+          success, check_reports_from = check_facts(host_id, facts)
+          return false unless success
+
           host = ::Host.find(host_id)
-          host.reports.order('reported_at DESC').any? do |report|
+          host.reports.
+              where('reported_at > ?', check_reports_from).
+              order('reported_at DESC').
+              any? do |report|
             #check_for_failures(report, host.id)
             report_change?(report)
           end
@@ -72,6 +78,19 @@ module Actions
 
         def report_change?(report)
           report.status['applied'] > 0
+        end
+
+        def check_facts(host_id, facts)
+          return false, nil unless facts
+
+          facts_value_map = facts.map do |name, value|
+            [FactValue.joins(:fact_name).where(host_id: host_id, fact_names: { name: name }).first, value]
+          end
+          facts_set       = facts_value_map.all? { |fact, value| fact && fact.value == value }
+          return false, nil unless facts_set
+
+          # TODO check that updated_at is not updated even when the fact is uploaded but the value is unchanged
+          return true, facts_value_map.map { |fact, _| fact.updated_at }.max
         end
 
         # TODO To aid logging add the report ID to the exception or
