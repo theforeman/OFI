@@ -118,6 +118,15 @@ module Staypuft
                 :filename => @deployment.name + '.yml'
     end
 
+    def update
+      @deployment = Deployment.find(params[:id])
+      @deployment.update_attributes(params[:deployment])
+      respond_to do |format|
+        format.json { render :status => 200, :json => @deployment.to_json }
+        format.html { redirect deployment_page(@deployment) }
+      end
+    end
+
     def import_config
       @deployment = Deployment.find(params[:id])
       unless params[:deployment_config_file].nil?
