@@ -474,7 +474,7 @@ module Staypuft
               'nova_public_vip'               => vip_format(:nova),
               'amqp_vip'                      => vip_format(:amqp),
               'swift_public_vip'              => vip_format(:swift),
-              'private_ip'                    => { :string => '<%= @host.ip %>' },
+              'private_ip'                    => { :string => '<%= @host.provisioning_ip %>' },
               'cluster_control_ip'            => { :string => '<%= @host.deployment.ips.controller_ips.first %>' },
               'lb_backend_server_addrs'       => { :array => '<%= @host.deployment.ips.controller_ips %>' },
               'lb_backend_server_names'       => { :array => '<%= @host.deployment.ips.controller_fqdns %>' } },

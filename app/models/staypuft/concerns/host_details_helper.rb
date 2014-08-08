@@ -1,3 +1,5 @@
+require 'resolv'
+
 module Staypuft
   module Concerns
     module HostDetailsHelper
@@ -39,6 +41,18 @@ module Staypuft
           nil
         end
       end
+
+      # TODO: a better fix is needed once we have explicit subnet support in staypuft
+      # This is needed because host.ip doesn't always return the expected ip address
+      # when the host has more than one network interface -- this ensures that the
+      # provisioning network interface is the chosen one.
+      def provisioning_ip
+        Resolv::DNS.new(:nameserver => 'localhost').getaddress(self.fqdn).to_s
+      end
     end
   end
+end
+
+class ::Host::Managed::Jail < Safemode::Jail
+  allow :provisioning_ip
 end
