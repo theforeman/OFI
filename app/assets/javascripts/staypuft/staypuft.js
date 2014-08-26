@@ -123,25 +123,18 @@ $(function () {
     }
   }
 
-  showCinderNfsUri();
-  $("input[name='staypuft_deployment[cinder][driver_backend]']").change(showCinderNfsUri);
-  function showCinderNfsUri() {
-    if ($('#staypuft_deployment_cinder_driver_backend_nfs').is(":checked")) {
-      $('.cinder_nfs_uri').show();
+  showBackEndConfig();
+  $("select[name='cinderBackend']").live('change', function (){showBackEndConfig($(this))});
+  function showBackEndConfig(element) {
+    if ($(element).val() === "nfs") {
+      $(element).parent().parent().find("div[class^='cinder_nfs_uri']").show();
+    } else {
+      $(element).parent().parent().find("div[class^='cinder_nfs_uri']").hide();
     }
-    else {
-      $('.cinder_nfs_uri').hide();
-    }
-  }
-
-  showCinderEquallogic();
-  $("input[name='staypuft_deployment[cinder][driver_backend]']").change(showCinderEquallogic);
-  function showCinderEquallogic() {
-    if ($('#staypuft_deployment_cinder_driver_backend_equallogic').is(":checked")) {
-      $('.cinder_equallogic').show();
-    }
-    else {
-      $('.cinder_equallogic').hide();
+    if ($(element).val() === "equallogic") {
+      $(element).parent().parent().find("div[class^='cinder_equallogic']").show();
+    } else {
+      $(element).parent().parent().find("div[class^='cinder_equallogic']").hide();
     }
   }
 
@@ -248,5 +241,31 @@ $(function () {
       }).show();
   });
 
-  $('.inner-nav').click(function(){ hosts_filter.val("").keyup(); }); 
+  $('.inner-nav').click(function(){ hosts_filter.val("").keyup(); });
+
+  var regex = /^(.+)(\d*)$/i;
+
+//    /^(.*)(\d)+$/i;
+  var cloneIndex = $(".cinderPicker").length;
+
+  $("button.add_another_server").live("click", function(){
+
+    var theClone = $(this).siblings(".cinder").find('.cinderPicker:last').clone()
+        .appendTo(".cinder")
+        .attr("id", "cinderPicker" +  cloneIndex)
+        .find("*").each(function() {
+          var id = this.id || "";
+          var match = id.match(regex) || [];
+          if (match.length == 3) {
+            this.id = match[1] + (cloneIndex);
+          }
+    });
+    $('#cinderPicker' + cloneIndex).find('.fields').hide();
+    cloneIndex++;
+
+  });
+
+  $("button.remove").live("click", function(){
+      $(this).parents(".clonedInput").remove();
+  });
 });
