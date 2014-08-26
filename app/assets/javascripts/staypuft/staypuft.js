@@ -245,7 +245,6 @@ $(function () {
 
   var regex = /^(.+)(\d*)$/i;
 
-//    /^(.*)(\d)+$/i;
   var cloneIndex = $(".cinderPicker").length;
 
   $("button.add_another_server").live("click", function(){
