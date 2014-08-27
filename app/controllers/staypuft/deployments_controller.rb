@@ -159,20 +159,19 @@ module Staypuft
       converting_discovered = discovered_host.is_a? Host::Discovered
 
       if converting_discovered
-        hosts_facts = FactValue.joins(:fact_name).where(host_id: discovered_host.id)
-        discovery_bootif = hosts_facts.where(fact_names: { name: 'discovery_bootif' }).first or
-            raise 'unknown discovery_bootif fact'
+        facts_hash       = discovered_host.facts_hash
+        discovery_bootif = facts_hash['discovery_bootif'] || raise('unknown discovery_bootif fact')
 
-        interface = hosts_facts.
-            includes(:fact_name).
-            where(value: [discovery_bootif.value.upcase, discovery_bootif.value.downcase]).
-            find { |v| v.fact_name.name =~ /^macaddress_.*$/ }.
-            fact_name.name.split('_').last
+        fact_name = FactName.joins(:fact_values)
+          .where(:fact_values => { :value => [discovery_bootif.downcase, discovery_bootif.upcase] })
+          .where(['name LIKE (?)', 'macaddress_%']).first
+        raise 'Failed to find discovery boot interface details, please make sure you are using an up2date discovery image' unless fact_name
+        interface = fact_name.name.split('_').last
 
-        network = hosts_facts.where(fact_names: { name: "network_#{interface}" }).first
-        hostgroup.subnet.network == network.value or
-            raise "networks do not match: #{hostgroup.subnet.network} #{network.value}"
-        ip = hosts_facts.where(fact_names: { name: "ipaddress_#{interface}" }).first
+        network = facts_hash["network_#{interface}"] # TODO: extract and handle better, this may fail as not always there is a network fact..
+        hostgroup.subnet.network == network or
+          raise "networks do not match: #{hostgroup.subnet.network} #{network}"
+        ip = facts_hash["ip_#{interface}"]
       end
 
       original_type = discovered_host.type
@@ -180,8 +179,8 @@ module Staypuft
       host.type     = 'Host::Managed'
       host.managed  = true
       host.build    = true
-      host.ip       = ip.value if converting_discovered
-      host.mac      = discovery_bootif.value if converting_discovered
+      host.ip       = ip if converting_discovered
+      host.mac      = discovery_bootif if converting_discovered
 
       host.hostgroup   = hostgroup
       # set discovery environment to keep booting discovery image
@@ -190,7 +189,7 @@ module Staypuft
       # root_pass is not copied for some reason
       host.root_pass   = hostgroup.root_pass
 
-      # I do not why but the final save! adds following condytion to the update SQL command
+      # I do not why but the final save! adds following condition to the update SQL command
       # "WHERE "hosts"."type" IN ('Host::Managed') AND "hosts"."id" = 283"
       # which will not find the record since it's still Host::Discovered.
       # Using #update_column to change it directly in DB
