@@ -1,0 +1,26 @@
+<%= f.fields_for :fencing do |fencing_fields| %>
+  <%= fencing_fields.fields_for :attrs do |attrs_fields| %>
+    <%= checkbox_f attrs_fields, :fencing_enabled,
+                                 label: _("Enable Fencing") %>
+    <%= select_f attrs_fields, :fencing_type, [_("IPMI")], :to_s, :to_s,
+                               { include_blank: true },
+                               { label: _("Type") } %>
+    <%= text_f attrs_fields, :fence_ipmilan_address,
+                             label: _("IP Address"),
+                             disabled: true,
+                             help_inline: _("This field can be edited on the 'Network' tab via a BMC interface.") %>
+    <%= text_f attrs_fields, :fence_ipmilan_username,
+                             label: _("Username"),
+                             disabled: true,
+                             help_inline: _("This field can be edited on the 'Network' tab via a BMC interface.") %>
+    <%= password_f attrs_fields, :fence_ipmilan_password,
+                             label: _("Password"),
+                             disabled: true,
+                             placeholder: '********',
+                             help_inline:_("This field can be edited on the 'Network' tab via a BMC interface.") %>
+    <%= text_f attrs_fields, :fence_ipmilan_expose_lanplus,
+                             label: _("Expose Lanplus") %>
+    <%= text_f attrs_fields, :fence_ipmilan_lanplus_options,
+                             label: _("Lanplus Options") %>
+  <% end %>
+<% end %>
