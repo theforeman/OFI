@@ -45,6 +45,11 @@ module Staypuft
             sort_by { |v| v.scan('/').size }. # ordered by the directory depth
             map { |v| require_dependency v }
       end
+
+      ::HostsController.view_paths.paths
+      staypuft_view_path = ::HostsController.view_paths.paths.find { |view_path| view_path.to_path =~ /\/staypuft\//}
+      ::HostsController.view_paths.paths.delete(staypuft_view_path)
+      ::HostsController.view_paths.paths.prepend(staypuft_view_path)
     end
 
     rake_tasks do
