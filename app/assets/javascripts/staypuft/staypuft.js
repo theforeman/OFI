@@ -123,18 +123,25 @@ $(function () {
     }
   }
 
-  showBackEndConfig();
-  $("select[name='cinderBackend']").live('change', function (){showBackEndConfig($(this))});
-  function showBackEndConfig(element) {
-    if ($(element).val() === "nfs") {
-      $(element).parent().parent().find("div[class^='cinder_nfs_uri']").show();
-    } else {
-      $(element).parent().parent().find("div[class^='cinder_nfs_uri']").hide();
+  showCinderNfsUri();
+  $("#staypuft_deployment_cinder_backend_nfs").change(showCinderNfsUri);
+  function showCinderNfsUri() {
+    if ($('#staypuft_deployment_cinder_backend_nfs').is(":checked")) {
+      $('.cinder_nfs_uri').show();
     }
-    if ($(element).val() === "equallogic") {
-      $(element).parent().parent().find("div[class^='cinder_equallogic']").show();
-    } else {
-      $(element).parent().parent().find("div[class^='cinder_equallogic']").hide();
+    else {
+      $('.cinder_nfs_uri').hide();
+    }
+  }
+
+  showCinderEquallogic();
+  $("#staypuft_deployment_cinder_backend_eqlx").change(showCinderEquallogic);
+  function showCinderEquallogic() {
+    if ($('#staypuft_deployment_cinder_backend_eqlx').is(":checked")) {
+      $('.cinder_equallogic').show();
+    }
+    else {
+      $('.cinder_equallogic').hide();
     }
   }
 
@@ -249,9 +256,10 @@ $(function () {
 
   $("button.add_another_server").live("click", function(){
 
-    var theClone = $(this).siblings(".cinder").find('.cinderPicker:last').clone()
-        .appendTo(".cinder")
-        .attr("id", "cinderPicker" +  cloneIndex)
+    var theClone = $(this).siblings(".cinder_equallogic_picker")
+        .find('.eqlx:last').clone()
+        .appendTo(".cinder_equallogic_picker")
+        .attr("id", "eqlx" +  cloneIndex)
         .find("*").each(function() {
           var id = this.id || "";
           var match = id.match(regex) || [];
@@ -259,7 +267,6 @@ $(function () {
             this.id = match[1] + (cloneIndex);
           }
     });
-    $('#cinderPicker' + cloneIndex).find('.fields').hide();
     cloneIndex++;
 
   });
