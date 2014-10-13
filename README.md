@@ -1,3 +1,4 @@
+arthur
 # Staypuft OpenStack Foreman Installer Plugin
 
 Staypuft is the name of the OpenStack Foreman Installer plugin for The Foreman.
