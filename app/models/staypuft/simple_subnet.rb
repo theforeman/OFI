@@ -20,7 +20,7 @@ module Staypuft
     validates_format_of :gateway, :with => Net::Validations::IP_REGEXP,
                                   :if => Proc.new { |subnet| subnet.dhcp_server == 'none' },
                                   :allow_blank => true
-    validate :validate_network_address
+    validate :validate_network_address, presence: true
     validate :validate_ranges, :if => Proc.new { |subnet| subnet.dhcp_server == 'none' }
 
     def initialize(attrs={})
